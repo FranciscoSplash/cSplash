@@ -1,63 +1,65 @@
-# 🏥 ClinicaGeral (CSplash) - API de Gestão e Agendamento Clínico Multidisciplinar
+# 🏥 ClinicaGeral (CSplash) — API de Gestão e Agendamento Clínico Multidisciplinar
 
-O **ClinicaGeral** é uma API REST robusta desenvolvida em Java com Spring Boot para gerenciar o ecossistema de uma clínica de atendimento geral. O sistema organiza de forma dinâmica o cadastro de especialidades médicas (como Fisioterapia, Cardiologia, Clínica Médica, etc.), vincula essas especialidades aos médicos e gerencia o fluxo completo de agendamento de consultas para os pacientes.
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
+![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+![Swagger](https://img.shields.io/badge/-Swagger-%23C1E1C1?style=for-the-badge&logo=swagger&logoColor=black)
 
----
-
-## 🛠️ Tecnologias e Ferramentas Utilizadas
-
-* **Linguagem:** Java 17
-* **Framework Principal:** Spring Boot 3.x
-* **Persistência de Dados:** Spring Data JPA
-* **Banco de Dados:** MySQL
-* **Validação de Dados:** Jakarta Bean Validation
-* **Ferramenta de Testes/Documentação:** Swagger UI (OpenAPI)
-* **Gerenciador de Dependências:** Maven
+O **ClinicaGeral** é uma API REST robusta desenvolvida para gerenciar de forma dinâmica e segura o ecossistema de uma clínica de atendimento multidisciplinar. O sistema organiza o cadastro de especialidades médicas, vincula-as aos profissionais de saúde e gerencia com inteligência o fluxo completo de agendamento de consultas, tudo protegido por camadas modernas de segurança de software.
 
 ---
 
 ## 🎯 Diferenciais Técnicos Aplicados (Padrões de Mercado)
 
-Este projeto foi construído seguindo as melhores práticas de desenvolvimento backend exigidas pelo mercado de trabalho:
+### 1. Segurança Avançada com Spring Security & JWT
+A API conta com uma arquitetura de segurança **Stateless**. O sistema implementa autenticação via tokens **JWT (JSON Web Tokens)** criptografados com o algoritmo HMAC256. Uma vez autenticado, o usuário tem suas permissões interceptadas por um filtro customizado (`JwtFilter`) que valida sua sessão a cada requisição.
 
-### 1. Relacionamentos Dinâmicos no Banco de Dados
-Diferente de sistemas engessados, as especialidades da clínica não são fixas (Enums). O projeto conta com um cadastro dinâmico de **Especialidades**, permitindo que a administração da clínica adicione novas áreas de atendimento a qualquer momento, associando-as diretamente ao cadastro de cada **Médico**.
+### 2. Controle de Acesso Baseado em Cargos (RBAC)
+Os endpoints da aplicação são protegidos de forma granular usando controle de autoridades (`hasAuthority`):
+* **`ADMIN`:** Controle total da clínica (pode cadastrar especialidades, gerenciar médicos e realizar exclusões).
+* **`USER`:** Acesso focado no paciente e recepção (pode listar especialidades disponíveis e agendar/consultar marcações).
 
-### 2. Arquitetura Defensiva e Tratamento Global de Erros
-Implementação de um `GlobalExceptionHandler` utilizando `@RestControllerAdvice`. A API foi blindada para que erros internos do Java ou do Banco de Dados nunca vazem para o cliente. O sistema intercepta falhas e responde com status HTTP semanticamente corretos e payloads JSON limpos.
+### 3. Relacionamentos Dinâmicos no Banco de Dados
+Diferente de sistemas engessados onde as áreas médicas são fixas (Enums), este projeto conta com um cadastro dinâmico de **Especialidades** no MySQL. Isso permite que a administração expanda a clínica para novas áreas a qualquer momento, associando-as dinamicamente a múltiplos médicos.
 
-### 3. Validação e Sanitização de Dados (Bean Validation)
-Garantia do princípio *"nunca confie nos dados que vêm do cliente"*. Uso de anotações como `@NotBlank`, `@Email`, `@Pattern` (para validação estrita de 11 dígitos do CPF) e `@FutureOrPresent` nos Records/DTOs. Se os dados estiverem inconsistentes, a requisição é barrada na porta de entrada (Status 400).
+### 4. Validação Estrita de Dados (Bean Validation) & CORS
+Garantia do princípio *"nunca confie nos dados que vêm do cliente"*. Uso de anotações como `@NotBlank`, `@Email`, `@Pattern` (para validação estrita de CPF) e `@FutureOrPresent`. Além disso, a segurança global do **CORS** está configurada para permitir comunicações seguras e livres de bloqueios de cabeçalhos (`Authorization`) entre o front-end/ferramentas de teste e a API.
 
-### 4. Regras de Negócio Avançadas de Agendamento
-O sistema possui inteligência para validar as seguintes regras no `ConsultaService`:
-* Impede que um médico ou paciente tenha mais de uma consulta agendada no mesmo horário.
-* Restringe agendamentos apenas para o horário comercial da clínica (**08:00 às 18:00**).
-* Bloqueia marcações de consultas aos finais de semana (**Sábados e Domingos**).
-
-### 5. Paginação e Ordenação de Alta Performance
-Todas as listagens principais da API (Consultas, Especialidades) utilizam `Pageable`. Isso impede a sobrecarga do banco de dados MySQL, permitindo carregar os dados em lotes (ex: 5 elementos por página) ordenados de forma nativa (ex: ordem alfabética por nome da especialidade).
-
----
-
-## 🚧 Próximos Passos (Roadmap do Projeto)
-
-O projeto está em constante evolução. As próximas implementações programadas são:
-* [ ] **Segurança da Informação:** Integração com o Spring Security.
-* [ ] **Autenticação e Autorização:** Implementação de login seguro com Tokens JWT.
-* [ ] **Controle de Perfis:** Restrição de rotas por nível de acesso administrativo e usuário (`ADMIN`, `MEDICO` e `PACIENTE`).
+### 5. Regras de Negócio de Alta Performance
+* **Regras de Agendamento:** Impede sobreposição de horários para médicos e pacientes, limitando os agendamentos ao horário comercial (08:00 às 18:00) de segunda a sexta-feira.
+* **Paginação Nativa:** Todas as listagens principais utilizam `Pageable`, impedindo sobrecarga no banco de dados ao carregar dados em lotes e ordenados nativamente.
+* **Tratamento Global de Erros:** Um manipulador de exceções (`@RestControllerAdvice`) intercepta falhas internas, erros de validação e violações de chaves estrangeiras, respondendo com payloads JSON limpos e padronizados.
 
 ---
 
-## 🚀 Como Executar o Projeto
+## 🔒 Permissões dos Endpoints
 
-1. Clone o repositório:
-   ```bash
-   git clone [https://github.com/SEU_USUARIO/clinica-geral-csplash.git](https://github.com/SEU_USUARIO/clinica-geral-csplash.git)
-   Configure a conexão com o seu banco de dados MySQL no arquivo src/main/resources/application.properties.
+| Método HTTP | Endpoint | Descrição | Nível de Acesso |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/auth/cadastrar` | Criação de novas contas | Público |
+| **POST** | `/api/auth/login` | Autenticação e geração do token JWT | Público |
+| **POST** | `/api/especialidades` | Cadastro de novas especialidades médicas | `ADMIN` |
+| **GET** | `/api/especialidades` | Listagem paginada de especialidades | `ADMIN`, `USER` |
+| **POST** | `/api/medicos` | Cadastro de novos profissionais de saúde | `ADMIN` |
+| **ANY** | `/api/consultas/**` | Agendamento e gestão de consultas | `ADMIN`, `USER` |
 
-Execute a aplicação através da sua IDE ou via terminal com o comando:
+---
 
-Bash
-mvn spring-boot:run
-Acesse a documentação das rotas e teste os endpoints pelo Swagger UI em: http://localhost:8080/swagger-ui.html
+## 📖 Como Executar o Projeto
+
+### Pré-requisitos
+* Java 17+ instalado
+* Maven instalado
+* Servidor MySQL ativo
+
+### 1. Clonar o Repositório
+```bash
+git clone [https://github.com/FranciscoSplash/cSplash.git](https://github.com/FranciscoSplash/cSplash.git)
+cd cSplash
+
+🗺️ Documentação da API (Swagger)
+Com a aplicação rodando, você pode explorar, visualizar e testar todos os endpoints de forma interativa através da URL:
+👉 http://localhost:8080/swagger-ui.html
+
+💡 Nota de Teste: Para acessar as rotas protegidas no Swagger, realize o login, copie o token gerado, clique no botão Authorize (cadeado) no topo da página do Swagger, cole o token (sem aspas e sem a palavra "Bearer") e clique em autorizar.
